@@ -1,5 +1,6 @@
 """Core prompt capture logic."""
 
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -14,6 +15,12 @@ from .storage import (
 from .utils import extract_prompt_from_args, format_timestamp
 
 console = Console()
+
+
+def get_claude_command() -> list[str]:
+    """Get the claude command to run (supports CLAUDE_CMD env var for testing)."""
+    cmd = os.environ.get("CLAUDE_CMD", "claude")
+    return cmd.split() if cmd else ["claude"]
 
 
 def show_save_feedback(prompt_id: int, timestamp: str) -> None:
@@ -48,8 +55,10 @@ def capture_and_run(args: list[str]) -> None:
         show_save_feedback(next_id, record["timestamp"])
 
     # 5. Forward to claude
+    claude_cmd = get_claude_command()
     subprocess.run(
-        ["claude"] + args,
+        claude_cmd + args,
         shell=False,
         check=False,
+        env=os.environ,
     )

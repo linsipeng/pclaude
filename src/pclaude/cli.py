@@ -1,6 +1,9 @@
 """CLI subcommands for pclaude."""
 
+import os
+import subprocess
 import typer
+from datetime import datetime
 from typing import Optional
 from rich.table import Table
 from rich.console import Console
@@ -11,11 +14,19 @@ from .storage import (
     get_prompt_by_id,
     get_recent_prompts,
     get_archive_path,
+    append_prompt,
+    get_next_id,
 )
 from .utils import extract_time_only, truncate_text
 
 app = typer.Typer()
 console = Console()
+
+
+def get_claude_command() -> list[str]:
+    """Get the claude command to run (supports CLAUDE_CMD env var for testing)."""
+    cmd = os.environ.get("CLAUDE_CMD", "claude")
+    return cmd.split() if cmd else ["claude"]
 
 
 @app.command()
@@ -97,10 +108,25 @@ def use(id: int, append: Optional[str] = typer.Argument(None, help="Additional i
     if append:
         new_prompt = f"{new_prompt} {append}"
 
+    # Save the new prompt as a new record
+    next_id = get_next_id(archive_path)
+    new_record = {
+        "id": f"#{next_id}",
+        "timestamp": datetime.now().isoformat(),
+        "prompt": new_prompt,
+        "source": "one-shot",
+        "session_id": None,
+    }
+    append_prompt(archive_path, new_record)
+
+    # Show save feedback
+    console.print(f"[SAVED] #{next_id} ({new_record['timestamp'][:19]})")
+    console.print(f"[dim]Use: pclaude show {next_id}    or    pclaude use {next_id}[/dim]")
+
     # Forward to claude
-    import subprocess
+    claude_cmd = get_claude_command()
     subprocess.run(
-        ["claude", new_prompt],
+        claude_cmd + [new_prompt],
         shell=False,
         check=False,
     )
