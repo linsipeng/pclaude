@@ -18,15 +18,10 @@ from .storage import (
     get_next_id,
 )
 from .utils import extract_time_only, truncate_text
+from .capture import get_claude_command, should_use_shell
 
 app = typer.Typer()
 console = Console()
-
-
-def get_claude_command() -> list[str]:
-    """Get the claude command to run (supports CLAUDE_CMD env var for testing)."""
-    cmd = os.environ.get("CLAUDE_CMD", "claude")
-    return cmd.split() if cmd else ["claude"]
 
 
 @app.command()
@@ -127,6 +122,6 @@ def use(id: int, append: Optional[str] = typer.Argument(None, help="Additional i
     claude_cmd = get_claude_command()
     subprocess.run(
         claude_cmd + [new_prompt],
-        shell=False,
+        shell=should_use_shell(),
         check=False,
     )

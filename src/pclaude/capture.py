@@ -1,6 +1,7 @@
 """Core prompt capture logic."""
 
 import os
+import platform
 import subprocess
 import sys
 from datetime import datetime
@@ -21,6 +22,15 @@ def get_claude_command() -> list[str]:
     """Get the claude command to run (supports CLAUDE_CMD env var for testing)."""
     cmd = os.environ.get("CLAUDE_CMD", "claude")
     return cmd.split() if cmd else ["claude"]
+
+
+def should_use_shell() -> bool:
+    """Determine if shell=True is needed (Windows npm scripts)."""
+    if platform.system() == "Windows":
+        # On Windows, npm global commands are .cmd files
+        # which require shell=True to work with PATH lookup
+        return True
+    return False
 
 
 def show_save_feedback(prompt_id: int, timestamp: str) -> None:
@@ -58,7 +68,6 @@ def capture_and_run(args: list[str]) -> None:
     claude_cmd = get_claude_command()
     subprocess.run(
         claude_cmd + args,
-        shell=False,
+        shell=should_use_shell(),
         check=False,
-        env=os.environ,
     )
