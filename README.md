@@ -13,8 +13,8 @@
 ### Windows
 
 ```powershell
-# 双击运行 install.bat 或执行：
-powershell -ExecutionPolicy Bypass -File install.bat
+# 双击运行 install.ps1 或执行：
+pwsh -ExecutionPolicy Bypass -File install.ps1
 ```
 
 ### macOS / Linux
