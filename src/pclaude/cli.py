@@ -4,6 +4,7 @@ import os
 import subprocess
 import typer
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 from rich.table import Table
 from rich.console import Console
@@ -125,3 +126,58 @@ def use(id: int, append: Optional[str] = typer.Argument(None, help="Additional i
         shell=should_use_shell(),
         check=False,
     )
+
+
+@app.command()
+def install_alias():
+    """Install 'claude' alias for automatic prompt capture."""
+    import platform
+    import shutil
+
+    console.print("[bold]pclaude Alias Installer[/bold]\n")
+    console.print("This will replace 'claude' command with pclaude.")
+    console.print("All prompts will be automatically captured.\n")
+
+    pclaude_path = shutil.which("pclaude") or "pclaude"
+
+    if platform.system() == "Windows":
+        # Windows PowerShell
+        profile_path = Path.home() / "Documents" / "PowerShell" / "Microsoft.PowerShell_profile.ps1"
+
+        if not profile_path.exists():
+            profile_path.parent.mkdir(parents=True, exist_ok=True)
+            profile_path.touch()
+
+        content = profile_path.read_text()
+        alias_line = 'Set-Alias -Name claude -Value "pclaude"'
+
+        if alias_line in content:
+            console.print("[green]Alias already installed.[/green]")
+        else:
+            with open(profile_path, "a", encoding="utf-8") as f:
+                f.write(f"\n# pclaude - Automatic prompt capture\n")
+                f.write(f"{alias_line}\n")
+            console.print(f"[green]Added alias to {profile_path}[/green]")
+            console.print("\n[bold]To activate, run:[/bold]")
+            console.print("  . $PROFILE")
+    else:
+        # Unix-like (bash, zsh)
+        shell = os.environ.get("SHELL", "")
+        if "zsh" in shell:
+            config_path = Path.home() / ".zshrc"
+        else:
+            config_path = Path.home() / ".bashrc"
+
+        alias_line = f'alias claude="pclaude"'
+
+        if config_path.exists() and alias_line in config_path.read_text():
+            console.print("[green]Alias already installed.[/green]")
+        else:
+            with open(config_path, "a", encoding="utf-8") as f:
+                f.write(f"\n# pclaude - Automatic prompt capture\n")
+                f.write(f"{alias_line}\n")
+            console.print(f"[green]Added alias to {config_path}[/green]")
+            console.print("\n[bold]To activate, run:[/bold]")
+            console.print("  source ~/.bashrc  # or ~/.zshrc")
+
+    console.print("\n[dim]After activation, 'claude' command will auto-capture prompts.[/dim]")

@@ -28,10 +28,25 @@ pipx install pclaude
 
 ## Quick Start
 
-### 1. Run claude with automatic capture
+### 1. Install the claude alias
 
 ```bash
-pclaude "Write a Python script to scrape Amazon prices"
+# This replaces 'claude' command with pclaude
+pclaude install-alias
+
+# Then activate (PowerShell)
+. $PROFILE
+
+# Or (Bash/Zsh)
+source ~/.bashrc  # or ~/.zshrc
+```
+
+After this, every `claude` command will automatically capture prompts!
+
+### 2. Run claude as usual
+
+```bash
+claude "Write a Python script to scrape Amazon prices"
 ```
 
 You'll see:
@@ -102,11 +117,13 @@ pclaude use 1 "and save to JSON instead"
 
 | Command | Description |
 |---------|-------------|
-| `pclaude "prompt"` | Run claude with automatic capture |
+| `claude "prompt"` | Run claude (after alias installed) |
+| `pclaude "prompt"` | Run claude directly |
 | `pclaude ls` | List recent prompts |
 | `pclaude search <keyword>` | Search prompts |
 | `pclaude show <id>` | Show full prompt |
 | `pclaude use <id> [append]` | Reuse a prompt |
+| `pclaude install-alias` | Install 'claude' alias |
 
 ### Options
 
@@ -170,8 +187,8 @@ poetry build
 
 ## Roadmap
 
-- [ ] v1.0 - MVP (current)
-- [ ] v1.1 - Interactive REPL support, quiet mode config
+- [x] v1.0 - MVP (done: capture, ls, search, show, use)
+- [ ] v1.1 - Alias installation, quiet mode, REPL support
 - [ ] v1.2 - Prompt templates, tags, batch export
 - [ ] v2.0 - Prompt versioning, edit/fork
 
