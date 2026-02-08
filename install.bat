@@ -19,7 +19,9 @@ echo [OK] Python installed
 
 echo.
 echo Installing pclaude...
-pip install -e "%~dp0" -q
+set "SCRIPT_DIR=%~dp0"
+set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
+pip install -e "%SCRIPT_DIR%" -q
 if errorlevel 1 (
     echo [ERROR] Installation failed
     pause
